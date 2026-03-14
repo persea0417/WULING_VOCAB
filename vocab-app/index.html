@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="description" content="VocabMaster — 在語境中高效記憶英語單字的智能背單字應用">
+  <title>VocabMaster 背單字</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ========== PAGES ========== -->
+    <div class="pages">
+
+      <!-- ── HOME ── -->
+      <div id="page-home" class="page active">
+        <div class="home-header">
+          <p class="greeting" id="greeting">晚上好 👋</p>
+          <h1>VocabMaster</h1>
+          <div class="streak-badge" id="streak-badge">
+            🔥 <span id="streak-count">0</span> 天連續學習
+          </div>
+        </div>
+
+        <!-- 詞書選擇器 -->
+        <div class="book-selector" id="book-selector">
+          <!-- Dynamically filled -->
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="home-learned">0</div>
+            <div class="stat-label">已學會</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="home-learning">0</div>
+            <div class="stat-label">學習中</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="home-review">0</div>
+            <div class="stat-label">待複習</div>
+          </div>
+        </div>
+
+        <div class="action-btns">
+          <button class="action-btn primary" id="btn-start-learn">
+            <div class="btn-icon">📚</div>
+            <div class="btn-text">
+              開始學習
+              <small>每日新單字 · <span id="daily-goal-display">10</span> 個</small>
+            </div>
+          </button>
+          <button class="action-btn secondary" id="btn-start-review">
+            <div class="btn-icon">🔄</div>
+            <div class="btn-text">
+              複習單字
+              <small>根據記憶曲線安排</small>
+            </div>
+          </button>
+          <button class="action-btn secondary" id="btn-start-quiz">
+            <div class="btn-icon">🎯</div>
+            <div class="btn-text">
+              單字測驗
+              <small>選擇題 · 拼寫題</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── LEARN ── -->
+      <div id="page-learn" class="page">
+        <div class="learn-header">
+          <button class="back-btn" id="learn-back">←</button>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="learn-progress" style="width: 0%"></div>
+          </div>
+          <span class="learn-counter" id="learn-counter">0/10</span>
+        </div>
+
+        <div id="learn-content">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+
+      <!-- ── QUIZ ── -->
+      <div id="page-quiz" class="page">
+        <div class="learn-header">
+          <button class="back-btn" id="quiz-back">←</button>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="quiz-progress" style="width: 0%"></div>
+          </div>
+          <span class="learn-counter" id="quiz-counter">0/10</span>
+        </div>
+
+        <div id="quiz-content">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div id="page-stats" class="page">
+        <div class="stats-header">
+          <h2>📊 學習統計</h2>
+        </div>
+
+        <div class="chart-container">
+          <h3>過去 7 天學習量</h3>
+          <canvas id="stats-chart"></canvas>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-value" id="stats-total">0</div>
+            <div class="stat-label">總單字量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stats-mastered">0</div>
+            <div class="stat-label">已掌握</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stats-accuracy">0%</div>
+            <div class="stat-label">正確率</div>
+          </div>
+        </div>
+
+        <div class="word-list-section">
+          <h3>單字列表</h3>
+          <div class="word-list-tabs">
+            <button class="wl-tab active" data-filter="all">全部</button>
+            <button class="wl-tab" data-filter="mastered">已掌握</button>
+            <button class="wl-tab" data-filter="learning">學習中</button>
+            <button class="wl-tab" data-filter="new">待學習</button>
+          </div>
+          <div class="word-list-items" id="word-list-items">
+            <!-- Dynamically filled -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div id="page-settings" class="page">
+        <div class="settings-header">
+          <h2>⚙️ 設定</h2>
+        </div>
+
+        <div class="settings-group">
+          <div class="setting-item">
+            <div class="setting-label">
+              <span>每日學習量</span>
+              <small>每天學習的新單字數</small>
+            </div>
+            <div class="stepper">
+              <button id="daily-minus">−</button>
+              <span class="stepper-value" id="daily-value">10</span>
+              <button id="daily-plus">+</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span>深色模式</span>
+              <small>保護眼睛</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-dark" checked>
+              <div class="toggle-slider"></div>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span>發音口音</span>
+              <small>朗讀時的口音選擇</small>
+            </div>
+            <select class="setting-select" id="voice-select">
+              <option value="en-US">美式英語</option>
+              <option value="en-GB">英式英語</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span>自動發音</span>
+              <small>顯示單字時自動朗讀</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-auto-speak" checked>
+              <div class="toggle-slider"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 詞書管理 -->
+        <div class="book-manager">
+          <h3>📚 詞書管理</h3>
+          <p>將單字分類到不同詞書，有系統地學習。</p>
+          <div class="book-list" id="book-list">
+            <!-- Dynamically filled -->
+          </div>
+          <button class="import-btn" id="create-book-btn" style="margin-top:12px;">+ 建立新詞書</button>
+        </div>
+
+        <!-- Import Section -->
+        <div class="import-section">
+          <h3>📥 匯入單字庫</h3>
+          <p>支援 CSV / JSON 格式，或直接貼上文字，輕鬆擴充你的單字庫。</p>
+
+          <!-- 目標詞書選擇 -->
+          <div class="import-target">
+            <label for="import-target-book">匯入到詞書：</label>
+            <select class="setting-select" id="import-target-book">
+              <!-- Dynamically filled -->
+            </select>
+          </div>
+
+          <div class="import-area" id="import-drop-area">
+            <div class="import-icon">📂</div>
+            <p>點擊選擇檔案或拖放到此處</p>
+            <p style="font-size:12px; margin-top:6px; color:var(--text-muted);">支援 .csv / .json / .txt</p>
+            <input type="file" id="import-file-input" accept=".csv,.json,.txt" style="display:none">
+          </div>
+
+          <div style="text-align:center; margin: 12px 0; color:var(--text-muted); font-size:13px;">— 或 —</div>
+
+          <textarea class="import-textarea" id="import-textarea" placeholder="直接貼上單字，每行一個：&#10;word | 中文意思&#10;hello | 你好&#10;world | 世界"></textarea>
+
+          <button class="import-btn" id="import-btn">匯入單字</button>
+
+          <div id="import-result"></div>
+
+          <div class="format-hint">
+            <span style="font-size:13px; font-weight:600;">支援的格式：</span>
+            <code>CSV: word,meaning
+hello,你好
+world,世界
+
+TXT: word | meaning
+hello | 你好
+
+JSON: [{"word":"hello","meanings":["你好"]}]</code>
+          </div>
+        </div>
+
+        <div class="settings-group" style="margin-top:20px;">
+          <div class="setting-item">
+            <div class="setting-label">
+              <span style="color:var(--danger);">重設學習進度</span>
+              <small>清除所有學習記錄</small>
+            </div>
+            <button class="import-btn" style="width:auto; padding:10px 20px; font-size:14px; background:linear-gradient(135deg,#ff6b6b,#ee5a24);" id="reset-btn">重設</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pages -->
+
+    <!-- ========== TAB BAR ========== -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-page="home" id="tab-home">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        首頁
+      </button>
+      <button class="tab-btn" data-page="stats" id="tab-stats">
+        <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        統計
+      </button>
+      <button class="tab-btn" data-page="settings" id="tab-settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        設定
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== CREATE BOOK MODAL ========== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📚 建立新詞書</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">詞書名稱</label>
+        <input type="text" class="modal-input" id="new-book-name" placeholder="例如：TOEFL 核心詞彙" maxlength="20">
+        <label class="modal-label">選擇圖示</label>
+        <div class="icon-picker" id="icon-picker">
+          <button class="icon-option active" data-icon="📗">📗</button>
+          <button class="icon-option" data-icon="📕">📕</button>
+          <button class="icon-option" data-icon="📙">📙</button>
+          <button class="icon-option" data-icon="📓">📓</button>
+          <button class="icon-option" data-icon="📒">📒</button>
+          <button class="icon-option" data-icon="🎯">🎯</button>
+          <button class="icon-option" data-icon="🏆">🏆</button>
+          <button class="icon-option" data-icon="💼">💼</button>
+          <button class="icon-option" data-icon="🎓">🎓</button>
+          <button class="icon-option" data-icon="🌍">🌍</button>
+          <button class="icon-option" data-icon="✈️">✈️</button>
+          <button class="icon-option" data-icon="💡">💡</button>
+        </div>
+      </div>
+      <button class="import-btn" id="confirm-create-book" style="width:100%;">建立詞書</button>
+    </div>
+  </div>
+
+  <!-- ========== TOAST ========== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
