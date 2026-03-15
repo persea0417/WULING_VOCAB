@@ -42,7 +42,7 @@
 
 ```bash
 # 1. Clone 專案
-git clone https://github.com/persea0417/vocab-app.git
+git clonehttps://persea0417.github.io/WULING_VOCAB.git
 cd vocab-app
 
 # 2. 啟動本地伺服器（任選一種）
