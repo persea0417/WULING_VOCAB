@@ -2,7 +2,7 @@
 // Service Worker — Cache-first for offline support
 // ===================================================================
 
-const CACHE_NAME = 'vocabmaster-v3';
+const CACHE_NAME = 'vocabmaster-v4';
 const ASSETS = [
   './',
   './index.html',

@@ -34,7 +34,7 @@
 
 ### 線上使用
 
-直接造訪 → **[VocabMaster](https://persea0417.github.io/WULING_VOCAB/)**
+直接造訪 → **[VocabMaster](https://persea0417.github.io/vocab-app/)**
 
 > 💡 在手機瀏覽器中打開後，點選「加入主畫面」即可像原生 App 一樣使用。
 
@@ -42,7 +42,7 @@
 
 ```bash
 # 1. Clone 專案
-git clonehttps://persea0417.github.io/WULING_VOCAB.git
+git clone https://github.com/persea0417/vocab-app.git
 cd vocab-app
 
 # 2. 啟動本地伺服器（任選一種）
