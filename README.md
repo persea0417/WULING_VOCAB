@@ -34,7 +34,7 @@
 
 ### 線上使用
 
-直接造訪 → **[VocabMaster](https://persea0417.github.io/WULING_VOCAB/)**
+直接造訪 → **[VocabMaster](https://persea0417.github.io/vocab-app/)**
 
 > 💡 在手機瀏覽器中打開後，點選「加入主畫面」即可像原生 App 一樣使用。
 
@@ -42,8 +42,8 @@
 
 ```bash
 # 1. Clone 專案
-git clone https://github.com/persea0417/WULING_VOCAB.git
-cd WULING_VOCAB
+git clone https://github.com/persea0417/vocab-app.git
+cd vocab-app
 
 # 2. 啟動本地伺服器（任選一種）
 python -m http.server 8080
@@ -54,7 +54,7 @@ npx serve .
 # http://localhost:8080
 ```
 
-> 因為使用了 ES Modules，必須透過 HTTP 伺服器開啟，不能直接雙擊 `index.html`。
+> ⚠️ 因為使用了 ES Modules，必須透過 HTTP 伺服器開啟，不能直接雙擊 `index.html`。
 
 ## 📥 匯入單字格式
 
