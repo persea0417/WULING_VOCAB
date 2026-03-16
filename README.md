@@ -43,7 +43,7 @@
 ```bash
 # 1. Clone 專案
 git clone https://github.com/persea0417/WULING_VOCAB.git
-cd vocab-app
+cd WULING_VOCAB
 
 # 2. 啟動本地伺服器（任選一種）
 python -m http.server 8080
@@ -54,7 +54,7 @@ npx serve .
 # http://localhost:8080
 ```
 
-> ⚠️ 因為使用了 ES Modules，必須透過 HTTP 伺服器開啟，不能直接雙擊 `index.html`。
+> 因為使用了 ES Modules，必須透過 HTTP 伺服器開啟，不能直接雙擊 `index.html`。
 
 ## 📥 匯入單字格式
 
