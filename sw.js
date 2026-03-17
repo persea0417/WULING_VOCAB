@@ -2,15 +2,15 @@
 // Service Worker — Cache-first for offline support
 // ===================================================================
 
-const CACHE_NAME = 'vocabmaster-v2';
+const CACHE_NAME = 'vocabmaster-v6';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
-  './app.js',
+  './app.js?v=4',
   './data/words.js',
   './modules/spaced-repetition.js',
-  './modules/learning.js',
+  './modules/learning-v2.js?v=4',
   './modules/quiz.js',
   './modules/stats.js',
   './modules/import.js',

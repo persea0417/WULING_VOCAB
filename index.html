@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <div id="app">
@@ -76,12 +76,13 @@
       <!-- ── LEARN ── -->
       <div id="page-learn" class="page">
         <div class="learn-header">
-          <button class="back-btn" id="learn-back">←</button>
-          <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="learn-progress" style="width: 0%"></div>
+          <button class="back-btn" id="learn-back">&lt; 學習</button>
+          <div class="learn-right-controls">
+            <button class="icon-btn">•••</button>
+            <button class="icon-btn">◉</button>
           </div>
-          <span class="learn-counter" id="learn-counter">0/10</span>
         </div>
+        <div class="learn-progress-text" id="learn-counter">0 / 10</div>
 
         <div id="learn-content">
           <!-- Dynamically filled -->
@@ -140,6 +141,27 @@
           <div class="word-list-items" id="word-list-items">
             <!-- Dynamically filled -->
           </div>
+        </div>
+      </div>
+
+      <!-- ── SEARCH ── -->
+      <div id="page-search" class="page">
+        <div class="search-header">
+          <button class="back-btn" id="search-back">&lt; 搜尋</button>
+          <div class="learn-right-controls">
+            <button class="icon-btn">•••</button>
+            <button class="icon-btn">◉</button>
+          </div>
+        </div>
+        
+        <div class="search-bar-container">
+          <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" class="search-input" placeholder="搜尋單字...">
+          <button class="clear-search-btn" id="clear-search-btn" style="display:none;">✕</button>
+        </div>
+        
+        <div class="search-results-list" id="search-results-list">
+          <!-- Dynamically filled -->
         </div>
       </div>
 
@@ -263,6 +285,10 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         首頁
       </button>
+      <button class="tab-btn" data-page="search" id="tab-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        搜尋
+      </button>
       <button class="tab-btn" data-page="stats" id="tab-stats">
         <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
         統計
@@ -308,6 +334,6 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
   <div class="toast" id="toast"></div>
 
   <!-- ========== SCRIPTS ========== -->
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=4"></script>
 </body>
 </html>

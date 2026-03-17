@@ -4,7 +4,7 @@
 
 import { builtInWords } from './data/words.js';
 import { SpacedRepetition } from './modules/spaced-repetition.js';
-import { LearningModule } from './modules/learning-v2.js';
+import { LearningModule } from './modules/learning-v2.js?v=4';
 import { QuizModule } from './modules/quiz.js';
 import { StatsModule } from './modules/stats.js';
 import { ImportModule } from './modules/import.js';
@@ -43,7 +43,7 @@ class VocabMasterApp {
       localStorage.setItem('vocab_reset_clear_v1', 'true');
     }
 
-    console.log('✨ VocabMaster initialized');
+    console.log('🚀 VocabMaster initialized');
   }
 
   _unregisterSW() {
@@ -52,14 +52,14 @@ class VocabMasterApp {
         for (let registration of registrations) {
           registration.unregister();
         }
-        console.log('♻️ SW Unregistered for clean slate');
+        console.log('🔄 SW Unregistered for clean slate');
       });
     }
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Navigation
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   navigateTo(pageId) {
     // Deactivate all pages
@@ -95,6 +95,17 @@ class VocabMasterApp {
 
     this.currentPage = pageId;
 
+    // Hide tab-bar on secondary pages (learn, quiz), show on primary pages
+    const tabBar = document.querySelector('.tab-bar');
+    const secondaryPages = ['learn', 'quiz'];
+    if (tabBar) {
+      if (secondaryPages.includes(pageId)) {
+        tabBar.classList.add('tab-bar-hidden');
+      } else {
+        tabBar.classList.remove('tab-bar-hidden');
+      }
+    }
+
     // Page-specific init
     if (pageId === 'home') this._updateHome();
     if (pageId === 'stats') {
@@ -119,11 +130,11 @@ class VocabMasterApp {
     }
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Words
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
-  /** Get all available words (built‑in + custom) */
+  /** Get all available words (built-in + custom) */
   getAllWords() {
     const custom = this.importModule.loadCustomWords();
     return [...this.builtInWords, ...custom];
@@ -134,9 +145,9 @@ class VocabMasterApp {
     return this.wordbook.getActiveWords(this.getAllWords());
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Speech
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   speak(text) {
     if (!window.speechSynthesis) return;
@@ -154,9 +165,9 @@ class VocabMasterApp {
     window.speechSynthesis.speak(utterance);
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Toast
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   showToast(message, duration = 2000) {
     const toast = document.getElementById('toast');
@@ -169,17 +180,17 @@ class VocabMasterApp {
     }, duration);
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Daily Stats
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   recordDailyStats(count) {
     this.stats.recordDaily(count);
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Settings
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _loadSettings() {
     try {
@@ -219,9 +230,9 @@ class VocabMasterApp {
     if (toggleAutoSpeak) toggleAutoSpeak.checked = this.settings.autoSpeak;
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Home Page
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _updateHome() {
     const activeWords = this.getActiveWords();
@@ -245,9 +256,9 @@ class VocabMasterApp {
     this._renderBookSelector();
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Word Book UI
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _renderBookSelector() {
     const container = document.getElementById('book-selector');
@@ -303,7 +314,7 @@ class VocabMasterApp {
             <div class="book-count">${book.words.length} 個單字</div>
           </div>
         </div>
-        ${book.id !== 'default' ? `<button class="book-delete" data-book-id="${book.id}" aria-label="刪除"></button>` : ''}
+        ${book.id !== 'default' ? `<button class="book-delete" data-book-id="${book.id}" aria-label="刪除">🗑</button>` : ''}
       </div>
     `).join('');
 
@@ -312,12 +323,12 @@ class VocabMasterApp {
       btn.addEventListener('click', () => {
         const bookId = btn.dataset.bookId;
         const book = this.wordbook.getBook(bookId);
-        if (book && confirm(`確定要刪除詞書 "${book.name}" 嗎？\n其中的單字學習進度將會保留，但分類會被移除。`)) {
+        if (book && confirm(`確定要刪除詞書「${book.name}」嗎？單字不會被刪除。`)) {
           this.wordbook.deleteBook(bookId);
           this._renderBookList();
           this._renderBookSelector();
           this._updateImportTargetSelect();
-          this.showToast('🗑️ 詞書已刪除');
+          this.showToast('🗑️ 已刪除詞書');
         }
       });
     });
@@ -378,17 +389,17 @@ class VocabMasterApp {
     if (!el) return;
 
     let greeting;
-    if (hour < 6) greeting = '夜深了，早點休息 🌙';
-    else if (hour < 12) greeting = '早安，準備開始學習嗎？ ☀️';
-    else if (hour < 18) greeting = '午安，加油！ ☕';
-    else greeting = '晚安，複習一下吧 😴';
+    if (hour < 6) greeting = '夜深了 🌙';
+    else if (hour < 12) greeting = '早安 ☀️';
+    else if (hour < 18) greeting = '午安 🌤️';
+    else greeting = '晚上好 🌙';
 
     el.textContent = greeting;
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Search
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _renderSearchList(query = '') {
     const container = document.getElementById('search-results-list');
@@ -411,7 +422,7 @@ class VocabMasterApp {
     }
 
     if (filtered.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding: 40px; color:var(--text-muted); font-size:14px;">查無結果，換個關鍵字試試 🔍</div>`;
+      container.innerHTML = `<div style="text-align:center; padding: 40px; color:var(--text-muted); font-size:14px;">沒有更多結果了哦</div>`;
       return;
     }
 
@@ -427,12 +438,12 @@ class VocabMasterApp {
     `).join('');
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Event Binding
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _bindGlobalEvents() {
-    //  Tab Navigation 
+    // ── Tab Navigation ──
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const page = btn.dataset.page;
@@ -440,12 +451,12 @@ class VocabMasterApp {
       });
     });
 
-    //  Home Actions 
+    // ── Home Actions ──
     document.getElementById('btn-start-learn')?.addEventListener('click', () => {
       const activeWords = this.getActiveWords();
       const newWords = this.sr.getNewWords(activeWords).slice(0, this.settings.dailyGoal);
       if (newWords.length === 0) {
-        this.showToast('✨ 所有單字都已開始學習囉！請嘗試複習模式');
+        this.showToast('🎊 所有單字都已學過！試試複習吧');
         return;
       }
       this.navigateTo('learn');
@@ -459,7 +470,7 @@ class VocabMasterApp {
         reviewWords = this.sr.getLearningWords(activeWords).slice(0, this.settings.dailyGoal);
       }
       if (reviewWords.length === 0) {
-        this.showToast('🙌 暫無需要複習的單字');
+        this.showToast('📭 暫無待複習的單字');
         return;
       }
       this.navigateTo('learn');
@@ -471,7 +482,7 @@ class VocabMasterApp {
       const allWords = this.getAllWords();
       const learnable = [...this.sr.getLearningWords(activeWords), ...this.sr.getMasteredWords(activeWords)];
       if (learnable.length < 4) {
-        this.showToast('💡 至少需要開始學習 4 個單字才能進行測驗');
+        this.showToast('📝 至少需要學過 4 個單字才能測驗');
         return;
       }
       const quizWords = this._shuffle(learnable).slice(0, Math.min(learnable.length, 10));
@@ -479,7 +490,7 @@ class VocabMasterApp {
       setTimeout(() => this.quiz.start(quizWords, allWords), 100);
     });
 
-    //  Back Buttons 
+    // ── Back Buttons ──
     document.getElementById('learn-back')?.addEventListener('click', () => {
       this.navigateTo('home');
     });
@@ -488,7 +499,7 @@ class VocabMasterApp {
       this.navigateTo('home');
     });
 
-    //  Settings 
+    // ── Settings ──
     document.getElementById('daily-minus')?.addEventListener('click', () => {
       this.settings.dailyGoal = Math.max(5, this.settings.dailyGoal - 5);
       document.getElementById('daily-value').textContent = this.settings.dailyGoal;
@@ -522,16 +533,16 @@ class VocabMasterApp {
     });
 
     document.getElementById('reset-btn')?.addEventListener('click', () => {
-      if (confirm('⚠️ 確定要重置所有學習進度嗎？此動作無法撤銷！')) {
+      if (confirm('確定要重設所有學習進度嗎？此動作無法復原！')) {
         this.sr.reset();
         this.stats.reset();
         this.wordbook.reset();
         this._updateHome();
-        this.showToast('♻️ 學習進度已清空');
+        this.showToast('🗑️ 所有進度已重設');
       }
     });
 
-    //  Stats Word List Tabs 
+    // ── Stats Word List Tabs ──
     document.querySelectorAll('.wl-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.wl-tab').forEach(t => t.classList.remove('active'));
@@ -541,23 +552,23 @@ class VocabMasterApp {
       });
     });
 
-    //  Word Book 
+    // ── Word Book ──
     this._bindBookEvents();
 
-    //  Import 
+    // ── Import ──
     this._bindImportEvents();
 
-    //  Search 
+    // ── Search ──
     this._bindSearchEvents();
 
-    //  Load voices 
+    // ── Load voices ──
     if (window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = () => {
         window.speechSynthesis.getVoices();
       };
     }
 
-    //  Keyboard shortcut — space to reveal 
+    // ── Keyboard shortcut — space to reveal ──
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && this.currentPage === 'learn') {
         e.preventDefault();
@@ -565,7 +576,7 @@ class VocabMasterApp {
       }
     });
 
-    //  Touch feedback for all interactive elements 
+    // ── Touch feedback for all interactive elements ──
     this._setupTouchFeedback();
   }
 
@@ -633,14 +644,14 @@ class VocabMasterApp {
       }
 
       const activeIcon = document.querySelector('.icon-option.active');
-      const icon = activeIcon?.dataset?.icon || '📖';
+      const icon = activeIcon?.dataset?.icon || '📗';
 
       this.wordbook.createBook(name, icon);
       this._closeCreateBookModal();
       this._renderBookSelector();
       this._renderBookList();
       this._updateImportTargetSelect();
-      this.showToast(`✅ 已建立詞書 "${name}"`);
+      this.showToast(`📚 已建立詞書「${name}」`);
     });
   }
 
@@ -687,13 +698,13 @@ class VocabMasterApp {
     importBtn?.addEventListener('click', () => {
       const text = textarea?.value?.trim();
       if (!text) {
-        this.showToast('請輸入或貼上單字資料');
+        this.showToast('請先輸入或貼上單字內容');
         return;
       }
 
       const words = this.importModule.parseText(text);
       if (words.length === 0) {
-        this._showImportResult('error', '❌ 無法解析單字，請檢查格式是否正確');
+        this._showImportResult('error', '無法解析任何單字，請檢查格式');
         return;
       }
 
@@ -705,7 +716,7 @@ class VocabMasterApp {
 
       const targetBook = this.wordbook.getBook(targetBookId);
       const bookName = targetBook ? targetBook.name : '詞書';
-      this._showImportResult('success', `✅ 成功匯入 ${added} 個新單字至 "${bookName}" (跳過重複 ${words.length - added} 個)`);
+      this._showImportResult('success', `✅ 成功匯入 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
       textarea.value = '';
       this._updateHome();
       this._renderBookList();
@@ -716,7 +727,7 @@ class VocabMasterApp {
     try {
       const words = await this.importModule.parseFile(file);
       if (words.length === 0) {
-        this._showImportResult('error', '檔案中無可匯入的單字');
+        this._showImportResult('error', '檔案中無法解析到有效單字');
         return;
       }
 
@@ -728,11 +739,11 @@ class VocabMasterApp {
 
       const targetBook = this.wordbook.getBook(targetBookId);
       const bookName = targetBook ? targetBook.name : '詞書';
-      this._showImportResult('success', `✅ 從 ${file.name} 匯入 ${added} 個新單字至 "${bookName}" (跳過重複 ${words.length - added} 個)`);
+      this._showImportResult('success', `✅ 從 ${file.name} 匯入了 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
       this._updateHome();
       this._renderBookList();
     } catch (err) {
-      this._showImportResult('error', '解析檔案發生錯誤: ' + err.message);
+      this._showImportResult('error', '檔案讀取失敗：' + err.message);
     }
   }
 
@@ -749,9 +760,9 @@ class VocabMasterApp {
     }, 5000);
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // iOS-like Interaction Helpers
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   /** Spring bounce a specific element */
   _springBounce(el) {
@@ -793,9 +804,9 @@ class VocabMasterApp {
     }, { passive: true });
   }
 
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
   // Utility
-  // ───────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════
 
   _shuffle(arr) {
     const a = [...arr];
@@ -815,7 +826,7 @@ class VocabMasterApp {
   }
 }
 
-//  Bootstrap 
+// ── Bootstrap ──
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new VocabMasterApp();
 });

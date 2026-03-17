@@ -1,5 +1,5 @@
 // ===================================================================
-// Learning Module — 學習流程控制器 (2-Pill Material You Version)
+// Learning Module — 學習流程控制器
 // ===================================================================
 
 export class LearningModule {
@@ -8,6 +8,8 @@ export class LearningModule {
     this.words = [];
     this.currentIndex = 0;
     this.isRevealed = false;
+    this.isTransitioning = false; // 防止連續點擊跳過多個單字
+    this.revealStage = 0; // 0=未揭示, 1=已顯示釋義, 2=全部顯示
     this.sessionStats = { know: 0, fuzzy: 0, unknown: 0 };
   }
 
@@ -16,6 +18,7 @@ export class LearningModule {
     this.words = words;
     this.currentIndex = 0;
     this.isRevealed = false;
+    this.isTransitioning = false;
     this.sessionStats = { know: 0, fuzzy: 0, unknown: 0 };
     this.render();
   }
@@ -50,11 +53,12 @@ export class LearningModule {
       </div>
 
       <div class="meanings-area hidden" id="meanings-area">
-        ${word.meanings.map(m => `<div class="meaning-item">${m}</div>`).join('')}
+        ${(word.meanings || []).map(m => `<div class="meaning-item">${m}</div>`).join('')}
+        ${word.pos ? `<div class="meaning-item pos-tag">${word.pos}</div>` : ''}
       </div>
 
       <div class="examples-area hidden" id="examples-area">
-        ${word.examples.map(ex => `
+        ${(word.examples || []).slice(0, 2).map(ex => `
           <div class="example-item">
             <div class="example-en">${this._highlightWord(ex.en, word.word)}</div>
             <div class="example-zh">${ex.zh}</div>
@@ -86,6 +90,7 @@ export class LearningModule {
     `;
 
     this.isRevealed = false;
+    this.revealStage = 0;
     this._bindEvents();
 
     // Auto-speak if enabled
@@ -123,20 +128,21 @@ export class LearningModule {
       });
     });
 
-    // Card tap to reveal (shortcut)
+    // Card tap to reveal (shortcut — follows staged reveal)
     const card = document.getElementById('current-word-card');
     if (card) {
       card.addEventListener('click', (e) => {
         if (e.target.closest('.speak-btn')) return;
-        if (!this.isRevealed) this._reveal();
+        if (this.revealStage < 2) this._reveal();
       });
     }
   }
 
-  /** Reveal meanings, examples, root info */
+  /** Reveal meanings, examples, root info and show rating buttons */
   _reveal() {
     if (this.isRevealed) return;
     this.isRevealed = true;
+    this.revealStage = 2;
 
     const meanings = document.getElementById('meanings-area');
     const examples = document.getElementById('examples-area');
@@ -150,22 +156,32 @@ export class LearningModule {
     if (revealBtn) revealBtn.classList.add('hidden');
     if (ratingBtns) ratingBtns.classList.remove('hidden');
 
-    // Scroll smoothly to show all content
     setTimeout(() => {
-      if (meanings) meanings.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (ratingBtns) ratingBtns.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 200);
   }
 
   /** Rate current word and advance */
   _rate(rating) {
+    // 🔒 防止連續點擊：如果正在過渡動畫中，忽略此次點擊
+    if (this.isTransitioning) return;
+    this.isTransitioning = true;
+
     const word = this.words[this.currentIndex];
     this.app.sr.recordRating(word.word, rating);
     this.sessionStats[rating]++;
 
+    // 立即禁用按鈕，防止重複點擊
+    const ratingBtns = document.querySelectorAll('.action-pill-btn');
+    ratingBtns.forEach(btn => {
+      btn.disabled = true;
+      btn.style.pointerEvents = 'none';
+    });
+
     // Animate card exit
     const card = document.getElementById('current-word-card');
     if (card) {
-      card.style.transition = 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s';
+      card.style.transition = 'transform 0.15s ease-out, opacity 0.1s ease-out';
       card.style.transform = 'translateX(-100%) rotate(-8deg)';
       card.style.opacity = '0';
     }
@@ -173,19 +189,22 @@ export class LearningModule {
     // Show feedback toast
     const messages = {
       know: '👍 太棒了！',
+      fuzzy: '🤔 下次加油！',
       unknown: '💪 已加入複習清單'
     };
-    this.app.showToast(messages[rating] || 'ok');
+    this.app.showToast(messages[rating]);
 
     // Advance after animation
     setTimeout(() => {
       this.currentIndex++;
+      this.isTransitioning = false; // 🔓 解除鎖定
       this.render();
-    }, 400);
+    }, 150);
   }
 
   /** Highlight target word in example sentence */
   _highlightWord(sentence, word) {
+    if (!sentence) return '';
     const regex = new RegExp(`(${word})`, 'gi');
     return sentence.replace(regex, '<mark>$1</mark>');
   }
@@ -196,7 +215,7 @@ export class LearningModule {
     const counter = document.getElementById('learn-counter');
     if (counter) counter.textContent = `${this.words.length} / ${this.words.length}`;
 
-    const total = this.sessionStats.know + this.sessionStats.unknown;
+    const total = this.sessionStats.know + this.sessionStats.fuzzy + this.sessionStats.unknown;
 
     container.innerHTML = `
       <div class="complete-screen">
