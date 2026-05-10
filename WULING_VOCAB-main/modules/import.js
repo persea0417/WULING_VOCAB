@@ -68,13 +68,21 @@ export class ImportModule {
         const w = {
           word: parts[0],
           phonetic: '',
-          pos: '',
-          meanings: parts.length >= 2 ? [parts[1]] : ['（未提供翻譯）'],
-          examples: parts.length >= 3
-            ? [{ en: parts[2], zh: parts.length >= 4 ? parts[3] : '' }]
-            : [],
-          rootInfo: ''
+          pos: parts.length >= 2 && parts[1].match(/^[a-z]+\.$/i) ? parts[1] : '',
+          meanings: parts.length >= 2 ? [(parts[1].match(/^[a-z]+\.$/i) && parts.length >= 3) ? parts[2] : parts[1]] : ['（未提供翻譯）'],
+          examples: [],
+          wordRoot: parts.length >= 4 ? parts[3] : '',
+          phrases: parts.length >= 5 ? parts[4] : ''
         };
+
+        // If pos was not captured but exists in column 2, meaning is in col 2.
+        // Let's simplify and make it strict for TXT: word | pos | meaning | wordRoot | phrases
+        if (line.includes('|') || line.includes('\t') || line.includes(',')) {
+             w.pos = parts.length >= 2 ? parts[1] : '';
+             w.meanings = parts.length >= 3 ? [parts[2]] : ['（未提供翻譯）'];
+             w.wordRoot = parts.length >= 4 ? parts[3] : '';
+             w.phrases = parts.length >= 5 ? parts[4] : '';
+        }
 
         // If there are more meanings separated by ;
         if (w.meanings[0] && w.meanings[0].includes(';')) {
@@ -148,7 +156,8 @@ export class ImportModule {
           ? [item.meaning || item.chinese || item.zh || item.cn || item.translation]
           : ['（未提供翻譯）'],
       examples: Array.isArray(item.examples) ? item.examples : [],
-      rootInfo: item.rootInfo || item.root || ''
+      wordRoot: item.wordRoot || item.rootInfo || item.root || '',
+      phrases: item.phrases || item.phrase || item.usage || ''
     };
   }
 

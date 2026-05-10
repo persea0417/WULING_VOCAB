@@ -4,7 +4,7 @@
 
 import { builtInWords } from './data/words.js';
 import { SpacedRepetition } from './modules/spaced-repetition.js';
-import { LearningModule } from './modules/learning.js';
+import { LearningModule } from './modules/learning-v2.js?v=4';
 import { QuizModule } from './modules/quiz.js';
 import { StatsModule } from './modules/stats.js';
 import { ImportModule } from './modules/import.js';
@@ -37,7 +37,24 @@ class VocabMasterApp {
     // Register service worker
     this._registerSW();
 
-    console.log('🚀 VocabMaster initialized');
+    // Force unregister to clear cache if needed
+    if (localStorage.getItem('vocab_reset_clear_v4') !== 'true') {
+      this._unregisterSW();
+      localStorage.setItem('vocab_reset_clear_v4', 'true');
+    }
+
+    console.log('[VocabMaster] initialized');
+  }
+
+  _unregisterSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+          console.log('[SW] Unregistered for clean slate');
+      });
+    }
   }
 
   // ═══════════════════════════════════════════
@@ -78,12 +95,33 @@ class VocabMasterApp {
 
     this.currentPage = pageId;
 
+    // Hide tab-bar on secondary pages (learn, quiz), show on primary pages
+    const tabBar = document.querySelector('.tab-bar');
+    const secondaryPages = ['learn', 'quiz'];
+    if (tabBar) {
+      if (secondaryPages.includes(pageId)) {
+        tabBar.classList.add('tab-bar-hidden');
+      } else {
+        tabBar.classList.remove('tab-bar-hidden');
+      }
+    }
+
     // Page-specific init
     if (pageId === 'home') this._updateHome();
     if (pageId === 'stats') {
       this.stats.updateStatsNumbers();
       this.stats.renderChart('stats-chart');
       this.stats.renderWordList('all', this.getActiveWords());
+    }
+    if (pageId === 'search') {
+      this._renderSearchList('');
+      const searchInput = document.getElementById('search-input');
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (searchInput) {
+        searchInput.value = '';
+        setTimeout(() => searchInput.focus(), 300);
+      }
+      if (clearBtn) clearBtn.style.display = 'none';
     }
     if (pageId === 'settings') {
       this._syncSettingsUI();
@@ -156,15 +194,20 @@ class VocabMasterApp {
 
   _loadSettings() {
     try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      return raw ? JSON.parse(raw) : {
-        dailyGoal: 10,
-        darkMode: true,
-        voiceLang: 'en-US',
-        autoSpeak: true
-      };
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      const defaultSettings = { dailyGoal: 10, theme: 'minimal', voiceLang: 'en-US', autoSpeak: true };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Migrate old darkMode setting if needed
+        if (parsed.darkMode !== undefined && !parsed.theme) {
+            parsed.theme = 'minimal';
+            delete parsed.darkMode;
+        }
+        return { ...defaultSettings, ...parsed };
+      }
+      return defaultSettings;
     } catch {
-      return { dailyGoal: 10, darkMode: true, voiceLang: 'en-US', autoSpeak: true };
+      return { dailyGoal: 10, theme: 'minimal', voiceLang: 'en-US', autoSpeak: true };
     }
   }
 
@@ -173,21 +216,35 @@ class VocabMasterApp {
   }
 
   _applyTheme() {
-    document.documentElement.dataset.theme = this.settings.darkMode ? 'dark' : 'light';
+    // 移除舊的 data-theme="dark/light"
+    document.documentElement.removeAttribute('data-theme');
+    
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    if (themeStylesheet) {
+      if (this.settings.theme === 'skeuomorph') {
+        themeStylesheet.href = 'style-skeuomorph.css';
+      } else if (this.settings.theme === 'neumorphism') {
+        themeStylesheet.href = 'style-neumorphism.css';
+      } else {
+        themeStylesheet.href = 'style-minimal.css';
+      }
+    }
+    
+    // 現在都是深色模式，固定 theme-color
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.content = this.settings.darkMode ? '#0a0a0f' : '#f5f5fa';
+      metaThemeColor.content = '#0a0a0f';
     }
   }
 
   _syncSettingsUI() {
     const dailyValue = document.getElementById('daily-value');
-    const toggleDark = document.getElementById('toggle-dark');
+    const themeSelect = document.getElementById('theme-select');
     const voiceSelect = document.getElementById('voice-select');
     const toggleAutoSpeak = document.getElementById('toggle-auto-speak');
 
     if (dailyValue) dailyValue.textContent = this.settings.dailyGoal;
-    if (toggleDark) toggleDark.checked = this.settings.darkMode;
+    if (themeSelect) themeSelect.value = this.settings.theme || 'minimal';
     if (voiceSelect) voiceSelect.value = this.settings.voiceLang;
     if (toggleAutoSpeak) toggleAutoSpeak.checked = this.settings.autoSpeak;
   }
@@ -231,7 +288,7 @@ class VocabMasterApp {
     const allWords = this.getAllWords();
 
     let html = `<button class="book-chip ${activeId === 'all' ? 'active' : ''}" data-book-id="all">
-      <span class="chip-icon">📚</span> 全部
+      <span class="chip-icon">✦</span> 全部
       <span class="chip-count">${allWords.length}</span>
     </button>`;
 
@@ -276,7 +333,7 @@ class VocabMasterApp {
             <div class="book-count">${book.words.length} 個單字</div>
           </div>
         </div>
-        ${book.id !== 'default' ? `<button class="book-delete" data-book-id="${book.id}" aria-label="刪除">🗑</button>` : ''}
+        ${book.id !== 'default' ? `<button class="book-delete" data-book-id="${book.id}" aria-label="刪除">✕</button>` : ''}
       </div>
     `).join('');
 
@@ -290,7 +347,7 @@ class VocabMasterApp {
           this._renderBookList();
           this._renderBookSelector();
           this._updateImportTargetSelect();
-          this.showToast('🗑️ 已刪除詞書');
+          this.showToast('✕ 已刪除詞書');
         }
       });
     });
@@ -351,12 +408,53 @@ class VocabMasterApp {
     if (!el) return;
 
     let greeting;
-    if (hour < 6) greeting = '夜深了 🌙';
-    else if (hour < 12) greeting = '早安 ☀️';
-    else if (hour < 18) greeting = '午安 🌤️';
-    else greeting = '晚上好 🌙';
+    if (hour < 6) greeting = '夜深了 ✦';
+    else if (hour < 12) greeting = '早安 ✦';
+    else if (hour < 18) greeting = '午安 ✦';
+    else greeting = '晚上好 ✦';
 
     el.textContent = greeting;
+  }
+
+  // ═══════════════════════════════════════════
+  // Search
+  // ═══════════════════════════════════════════
+
+  _renderSearchList(query = '') {
+    const container = document.getElementById('search-results-list');
+    if (!container) return;
+    
+    const words = this.getAllWords();
+    const lowerQuery = query.toLowerCase().trim();
+    
+    let filtered = words;
+    if (lowerQuery) {
+      filtered = words.filter(w => 
+        w.word.toLowerCase().includes(lowerQuery) || 
+        (w.meanings && w.meanings.some(m => m.includes(lowerQuery)))
+      );
+    }
+    
+    // Sort by length for exact matching priority if query exists
+    if (lowerQuery) {
+      filtered.sort((a, b) => a.word.length - b.word.length);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 40px; color:var(--text-muted); font-size:14px;">沒有更多結果了哦</div>`;
+      return;
+    }
+
+    // Limit to 50 results for performance
+    const renderList = filtered.slice(0, 50);
+
+    container.innerHTML = renderList.map(w => `
+      <div class="search-item">
+        <div class="search-item-word">${w.word}</div>
+        <div class="search-item-pos">${w.pos || ''}</div>
+        <div class="search-item-meaning">${(w.meanings || []).join('；')}</div>
+      </div>
+    `).join('');
   }
 
   // ═══════════════════════════════════════════
@@ -377,11 +475,11 @@ class VocabMasterApp {
       const activeWords = this.getActiveWords();
       const newWords = this.sr.getNewWords(activeWords).slice(0, this.settings.dailyGoal);
       if (newWords.length === 0) {
-        this.showToast('🎊 所有單字都已學過！試試複習吧');
+        this.showToast('✦ 所有單字都已學過！試試複習吧');
         return;
       }
       this.navigateTo('learn');
-      setTimeout(() => this.learning.start(newWords), 100);
+      setTimeout(() => this.learning.start(newWords, activeWords), 100);
     });
 
     document.getElementById('btn-start-review')?.addEventListener('click', () => {
@@ -391,11 +489,11 @@ class VocabMasterApp {
         reviewWords = this.sr.getLearningWords(activeWords).slice(0, this.settings.dailyGoal);
       }
       if (reviewWords.length === 0) {
-        this.showToast('📭 暫無待複習的單字');
+        this.showToast('✦ 暫無待複習的單字');
         return;
       }
       this.navigateTo('learn');
-      setTimeout(() => this.learning.start(reviewWords), 100);
+      setTimeout(() => this.learning.start(reviewWords, activeWords), 100);
     });
 
     document.getElementById('btn-start-quiz')?.addEventListener('click', () => {
@@ -403,7 +501,7 @@ class VocabMasterApp {
       const allWords = this.getAllWords();
       const learnable = [...this.sr.getLearningWords(activeWords), ...this.sr.getMasteredWords(activeWords)];
       if (learnable.length < 4) {
-        this.showToast('📝 至少需要學過 4 個單字才能測驗');
+        this.showToast('✦ 至少需要學過 4 個單字才能測驗');
         return;
       }
       const quizWords = this._shuffle(learnable).slice(0, Math.min(learnable.length, 10));
@@ -436,8 +534,8 @@ class VocabMasterApp {
       this._springBounce(document.getElementById('daily-plus'));
     });
 
-    document.getElementById('toggle-dark')?.addEventListener('change', (e) => {
-      this.settings.darkMode = e.target.checked;
+    document.getElementById('theme-select')?.addEventListener('change', (e) => {
+      this.settings.theme = e.target.value;
       this._applyTheme();
       this._saveSettings();
     });
@@ -459,7 +557,7 @@ class VocabMasterApp {
         this.stats.reset();
         this.wordbook.reset();
         this._updateHome();
-        this.showToast('🗑️ 所有進度已重設');
+        this.showToast('✦ 所有進度已重設');
       }
     });
 
@@ -479,6 +577,9 @@ class VocabMasterApp {
     // ── Import ──
     this._bindImportEvents();
 
+    // ── Search ──
+    this._bindSearchEvents();
+
     // ── Load voices ──
     if (window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = () => {
@@ -496,6 +597,35 @@ class VocabMasterApp {
 
     // ── Touch feedback for all interactive elements ──
     this._setupTouchFeedback();
+  }
+
+  _bindSearchEvents() {
+    const input = document.getElementById('search-input');
+    const clearBtn = document.getElementById('clear-search-btn');
+    const backBtn = document.getElementById('search-back');
+    
+    if (input) {
+      input.addEventListener('input', (e) => {
+        const val = e.target.value;
+        this._renderSearchList(val);
+        if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+      });
+    }
+    
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (input) input.value = '';
+        clearBtn.style.display = 'none';
+        this._renderSearchList('');
+        if (input) input.focus();
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        this.navigateTo('home');
+      });
+    }
   }
 
   _bindBookEvents() {
@@ -533,14 +663,14 @@ class VocabMasterApp {
       }
 
       const activeIcon = document.querySelector('.icon-option.active');
-      const icon = activeIcon?.dataset?.icon || '📗';
+      const icon = activeIcon?.dataset?.icon || '✦';
 
       this.wordbook.createBook(name, icon);
       this._closeCreateBookModal();
       this._renderBookSelector();
       this._renderBookList();
       this._updateImportTargetSelect();
-      this.showToast(`📚 已建立詞書「${name}」`);
+      this.showToast(`✦ 已建立詞書「${name}」`);
     });
   }
 
@@ -583,6 +713,16 @@ class VocabMasterApp {
       fileInput.value = ''; // reset
     });
 
+    // Copy AI Prompt
+    document.getElementById('copy-ai-prompt')?.addEventListener('click', () => {
+      const promptText = document.getElementById('ai-prompt-text');
+      if (promptText) {
+        promptText.select();
+        document.execCommand('copy');
+        this.showToast('✦ 提示詞已複製到剪貼簿');
+      }
+    });
+
     // Textarea import
     importBtn?.addEventListener('click', () => {
       const text = textarea?.value?.trim();
@@ -605,7 +745,7 @@ class VocabMasterApp {
 
       const targetBook = this.wordbook.getBook(targetBookId);
       const bookName = targetBook ? targetBook.name : '詞書';
-      this._showImportResult('success', `✅ 成功匯入 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
+      this._showImportResult('success', `✦ 成功匯入 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
       textarea.value = '';
       this._updateHome();
       this._renderBookList();
@@ -628,7 +768,7 @@ class VocabMasterApp {
 
       const targetBook = this.wordbook.getBook(targetBookId);
       const bookName = targetBook ? targetBook.name : '詞書';
-      this._showImportResult('success', `✅ 從 ${file.name} 匯入了 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
+      this._showImportResult('success', `✦ 從 ${file.name} 匯入了 ${added} 個新單字到「${bookName}」（共解析 ${words.length} 個）`);
       this._updateHome();
       this._renderBookList();
     } catch (err) {

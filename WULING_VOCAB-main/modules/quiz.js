@@ -24,7 +24,7 @@ export class QuizModule {
     this.locked = false;
 
     if (this.words.length === 0) {
-      this.app.showToast('🤷 沒有可測驗的單字，先去學習吧！');
+      this.app.showToast('✦ 沒有可測驗的單字，先去學習吧！');
       this.app.navigateTo('home');
       return;
     }
@@ -76,7 +76,9 @@ export class QuizModule {
       <div class="quiz-question">選出正確的中文意思</div>
       <div class="quiz-word-display">${word.word}</div>
       <div style="text-align:center;margin-bottom:16px;">
-        <button class="speak-btn" id="quiz-speak" style="font-size:24px;background:none;border:none;color:var(--accent-light);cursor:pointer;">🔊</button>
+        <button class="speak-btn" id="quiz-speak" style="background:none;border:none;color:var(--accent-light);cursor:pointer;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        </button>
       </div>
       <div class="quiz-options" id="quiz-options">
         ${options.map((opt, i) => `
@@ -141,7 +143,9 @@ export class QuizModule {
     container.innerHTML = `
       <div class="quiz-question">拼出這個單字的英文</div>
       <div style="text-align:center;margin-bottom:8px;">
-        <button class="speak-btn" id="quiz-speak" style="font-size:32px;background:none;border:none;color:var(--accent-light);cursor:pointer;">🔊</button>
+        <button class="speak-btn" id="quiz-speak" style="background:none;border:none;color:var(--accent-light);cursor:pointer;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        </button>
       </div>
       <div style="text-align:center;font-size:20px;font-weight:700;margin-bottom:20px;color:var(--text-primary);">
         ${word.meanings.join(' / ')}
@@ -175,13 +179,13 @@ export class QuizModule {
       if (correct) {
         this.sessionCorrect++;
         resultDiv.className = 'spell-result correct-result';
-        resultDiv.textContent = '✅ 完全正確！';
+        resultDiv.textContent = '✦ 完全正確！';
         this.app.sr.recordQuizResult(word.word, true);
         this._triggerHaptic();
         input.style.borderColor = 'var(--success)';
       } else {
         resultDiv.className = 'spell-result wrong-result';
-        resultDiv.innerHTML = `❌ 正確答案：<strong>${word.word}</strong>`;
+        resultDiv.innerHTML = `✦ 正確答案：<strong>${word.word}</strong>`;
         this.app.sr.recordQuizResult(word.word, false);
         input.style.borderColor = 'var(--danger)';
       }
@@ -232,7 +236,7 @@ export class QuizModule {
 
   _showMiniCelebration(element) {
     // Create floating emojis for correct answer
-    const emojis = ['🎉', '✨', '⭐', '💫'];
+    const emojis = ['✦', '✧', '✦', '✧'];
     for (let i = 0; i < 4; i++) {
       const span = document.createElement('span');
       span.textContent = emojis[i];
@@ -269,13 +273,13 @@ export class QuizModule {
       ? Math.round((this.sessionCorrect / this.sessionTotal) * 100)
       : 0;
 
-    let emoji = '🎉', title = '太棒了！';
-    if (accuracy < 50) { emoji = '💪'; title = '繼續加油！'; }
-    else if (accuracy < 80) { emoji = '👍'; title = '不錯哦！'; }
+    let emoji = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title = '太棒了！';
+    if (accuracy < 50) { emoji = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'; title = '繼續加油！'; }
+    else if (accuracy < 80) { emoji = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'; title = '不錯哦！'; }
 
     container.innerHTML = `
       <div class="complete-screen">
-        <div class="complete-emoji">${emoji}</div>
+        <div class="complete-emoji" style="color:var(--accent); font-size: 64px; line-height:1;">${emoji}</div>
         <div class="complete-title">${title}</div>
         <div class="complete-subtitle">測驗完成，查看你的表現</div>
         <div class="complete-stats">
@@ -291,11 +295,15 @@ export class QuizModule {
           </div>
         </div>
         <button class="action-btn primary" id="quiz-home-btn" style="margin-top:28px;">
-          <div class="btn-icon">🏠</div>
+          <div class="btn-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
           <div class="btn-text">返回首頁</div>
         </button>
         <button class="action-btn secondary" id="quiz-retry-btn" style="margin-top:12px;">
-          <div class="btn-icon">🔄</div>
+          <div class="btn-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+          </div>
           <div class="btn-text">再測一次</div>
         </button>
       </div>

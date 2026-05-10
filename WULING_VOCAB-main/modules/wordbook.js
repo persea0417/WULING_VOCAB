@@ -38,7 +38,7 @@ export class WordBookModule {
       defaultBook = {
         id: 'default',
         name: '核心詞彙',
-        icon: '📘',
+        icon: '✦',
         words: builtInKeys,
         createdAt: new Date().toISOString()
       };
@@ -72,7 +72,7 @@ export class WordBookModule {
   }
 
   /** Create a new book */
-  createBook(name, icon = '📗') {
+  createBook(name, icon = '✦') {
     const id = 'book_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     const book = {
       id,

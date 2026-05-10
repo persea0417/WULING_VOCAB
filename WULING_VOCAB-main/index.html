@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW" data-theme="dark">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
@@ -9,9 +9,9 @@
   <meta name="description" content="VocabMaster — 在語境中高效記憶英語單字的智能背單字應用">
   <title>VocabMaster 背單字</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23D4AF37'>✦</text></svg>">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css">
+  <link id="theme-stylesheet" rel="stylesheet" href="style-minimal.css">
 </head>
 <body>
   <div id="app">
@@ -21,10 +21,10 @@
       <!-- ── HOME ── -->
       <div id="page-home" class="page active">
         <div class="home-header">
-          <p class="greeting" id="greeting">晚上好 👋</p>
+          <p class="greeting" id="greeting">晚上好 <span style="color:var(--accent);">✦</span></p>
           <h1>VocabMaster</h1>
           <div class="streak-badge" id="streak-badge">
-            🔥 <span id="streak-count">0</span> 天連續學習
+            <span style="color:var(--accent);">✦</span> <span id="streak-count">0</span> 天連續學習
           </div>
         </div>
 
@@ -50,21 +50,27 @@
 
         <div class="action-btns">
           <button class="action-btn primary" id="btn-start-learn">
-            <div class="btn-icon">📚</div>
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            </div>
             <div class="btn-text">
               開始學習
               <small>每日新單字 · <span id="daily-goal-display">10</span> 個</small>
             </div>
           </button>
           <button class="action-btn secondary" id="btn-start-review">
-            <div class="btn-icon">🔄</div>
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+            </div>
             <div class="btn-text">
               複習單字
               <small>根據記憶曲線安排</small>
             </div>
           </button>
           <button class="action-btn secondary" id="btn-start-quiz">
-            <div class="btn-icon">🎯</div>
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            </div>
             <div class="btn-text">
               單字測驗
               <small>選擇題 · 拼寫題</small>
@@ -76,12 +82,13 @@
       <!-- ── LEARN ── -->
       <div id="page-learn" class="page">
         <div class="learn-header">
-          <button class="back-btn" id="learn-back">←</button>
-          <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="learn-progress" style="width: 0%"></div>
+          <button class="back-btn" id="learn-back">&lt; 學習</button>
+          <div class="learn-right-controls">
+            <button class="icon-btn">•••</button>
+            <button class="icon-btn">◉</button>
           </div>
-          <span class="learn-counter" id="learn-counter">0/10</span>
         </div>
+        <div class="learn-progress-text" id="learn-counter">0 / 10</div>
 
         <div id="learn-content">
           <!-- Dynamically filled -->
@@ -106,7 +113,7 @@
       <!-- ── STATS ── -->
       <div id="page-stats" class="page">
         <div class="stats-header">
-          <h2>📊 學習統計</h2>
+          <h2>學習統計</h2>
         </div>
 
         <div class="chart-container">
@@ -143,10 +150,31 @@
         </div>
       </div>
 
+      <!-- ── SEARCH ── -->
+      <div id="page-search" class="page">
+        <div class="search-header">
+          <button class="back-btn" id="search-back">&lt; 搜尋</button>
+          <div class="learn-right-controls">
+            <button class="icon-btn">•••</button>
+            <button class="icon-btn">◉</button>
+          </div>
+        </div>
+        
+        <div class="search-bar-container">
+          <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" class="search-input" placeholder="搜尋單字...">
+          <button class="clear-search-btn" id="clear-search-btn" style="display:none;">✕</button>
+        </div>
+        
+        <div class="search-results-list" id="search-results-list">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+
       <!-- ── SETTINGS ── -->
       <div id="page-settings" class="page">
         <div class="settings-header">
-          <h2>⚙️ 設定</h2>
+          <h2>設定</h2>
         </div>
 
         <div class="settings-group">
@@ -163,13 +191,14 @@
           </div>
           <div class="setting-item">
             <div class="setting-label">
-              <span>深色模式</span>
-              <small>保護眼睛</small>
+              <span>介面風格</span>
+              <small>選擇您喜歡的視覺風格</small>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-dark" checked>
-              <div class="toggle-slider"></div>
-            </label>
+              <select class="setting-select" id="theme-select">
+                <option value="minimal">極簡風格</option>
+                <option value="skeuomorph">擬物風格</option>
+                <option value="neumorphism">新擬態風格 (Neumorphism)</option>
+              </select>
           </div>
           <div class="setting-item">
             <div class="setting-label">
@@ -195,7 +224,7 @@
 
         <!-- 詞書管理 -->
         <div class="book-manager">
-          <h3>📚 詞書管理</h3>
+          <h3>詞書管理</h3>
           <p>將單字分類到不同詞書，有系統地學習。</p>
           <div class="book-list" id="book-list">
             <!-- Dynamically filled -->
@@ -205,7 +234,7 @@
 
         <!-- Import Section -->
         <div class="import-section">
-          <h3>📥 匯入單字庫</h3>
+          <h3>匯入單字庫</h3>
           <p>支援 CSV / JSON 格式，或直接貼上文字，輕鬆擴充你的單字庫。</p>
 
           <!-- 目標詞書選擇 -->
@@ -217,7 +246,9 @@
           </div>
 
           <div class="import-area" id="import-drop-area">
-            <div class="import-icon">📂</div>
+            <div class="import-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
             <p>點擊選擇檔案或拖放到此處</p>
             <p style="font-size:12px; margin-top:6px; color:var(--text-muted);">支援 .csv / .json / .txt</p>
             <input type="file" id="import-file-input" accept=".csv,.json,.txt" style="display:none">
@@ -225,22 +256,48 @@
 
           <div style="text-align:center; margin: 12px 0; color:var(--text-muted); font-size:13px;">— 或 —</div>
 
-          <textarea class="import-textarea" id="import-textarea" placeholder="直接貼上單字，每行一個：&#10;word | 中文意思&#10;hello | 你好&#10;world | 世界"></textarea>
+          <textarea class="import-textarea" id="import-textarea" placeholder="在此貼上您整理好的文字或 AI 生成的 JSON...&#10;純文字範例：&#10;abandon | v. | 放棄 | a- + bandon -> 放棄 | abandon oneself to"></textarea>
 
           <button class="import-btn" id="import-btn">匯入單字</button>
 
           <div id="import-result"></div>
 
           <div class="format-hint">
-            <span style="font-size:13px; font-weight:600;">支援的格式：</span>
-            <code>CSV: word,meaning
-hello,你好
-world,世界
+            <span style="font-size:13px; font-weight:600;">純文字支援格式：</span>
+            <code>英文單字 | 詞性 | 中文意思 | 字根字首(選填) | 片語句型(選填)
+abandon | v. | 放棄 | a- + bandon -> 放棄 | abandon oneself to</code>
+          </div>
 
-TXT: word | meaning
-hello | 你好
+          <!-- AI Prompt Section -->
+          <div class="ai-prompt-box" style="margin-top: 24px; padding: 16px; border-radius: var(--radius-md); background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.3);">
+            <h4 style="color: var(--accent); margin-bottom: 8px; font-size: 15px; display:flex; align-items:center; gap:6px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2a2 2 0 0 1-2-2c0-1.1.9-2 2-2z"/><path d="M12 6v16"/><path d="M12 10s4-2 7-2"/><path d="M12 10s-4-2-7-2"/></svg>
+              AI 快速生成提示詞
+            </h4>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">複製以下提示詞並傳送給 ChatGPT 或 Claude，讓 AI 自動幫您把單字轉換為完美支援的 JSON 格式。</p>
+            <div style="position: relative;">
+              <textarea id="ai-prompt-text" style="width:100%; height:120px; font-size:12px; font-family:monospace; background:var(--bg-primary); color:var(--text-primary); padding:10px; border:1px solid var(--bg-elevated); border-radius:var(--radius-sm); resize:none;" readonly>請幫我把以下英文單字轉換成 JSON 格式。每個單字需要包含以下欄位：
+1. "word": 英文單字
+2. "pos": 詞性 (例如 v., n., adj.)
+3. "meanings": 中文意思 (陣列格式，例如 ["意思1", "意思2"])
+4. "wordRoot": 字根字首解析 (選填，若無可留空字串)
+5. "phrases": 相關片語或句型用法 (選填，若無可留空字串)
 
-JSON: [{"word":"hello","meanings":["你好"]}]</code>
+輸出格式範例：
+[
+  {
+    "word": "abandon",
+    "pos": "v.",
+    "meanings": ["放棄", "拋棄"],
+    "wordRoot": "a- (不) + bandon (約束) -> 放棄",
+    "phrases": "abandon oneself to (沉溺於...)"
+  }
+]
+
+我的單字列表：
+[請在此貼上你的單字]</textarea>
+              <button id="copy-ai-prompt" style="position:absolute; top:8px; right:8px; background:var(--text-primary); color:var(--bg-primary); border:none; padding:4px 10px; font-size:12px; font-weight:bold; border-radius:4px; cursor:pointer;">複製</button>
+            </div>
           </div>
         </div>
 
@@ -250,7 +307,7 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
               <span style="color:var(--danger);">重設學習進度</span>
               <small>清除所有學習記錄</small>
             </div>
-            <button class="import-btn" style="width:auto; padding:10px 20px; font-size:14px; background:linear-gradient(135deg,#ff6b6b,#ee5a24);" id="reset-btn">重設</button>
+            <button class="import-btn" style="width:auto; padding:10px 20px; font-size:14px; background:linear-gradient(135deg,#ff6b6b,#ee5a24); color:#fff;" id="reset-btn">重設</button>
           </div>
         </div>
       </div>
@@ -262,6 +319,10 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
       <button class="tab-btn active" data-page="home" id="tab-home">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         首頁
+      </button>
+      <button class="tab-btn" data-page="search" id="tab-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        搜尋
       </button>
       <button class="tab-btn" data-page="stats" id="tab-stats">
         <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
@@ -278,7 +339,7 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h3>📚 建立新詞書</h3>
+        <h3>建立新詞書</h3>
         <button class="modal-close" id="modal-close">✕</button>
       </div>
       <div class="modal-body">
@@ -286,18 +347,18 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
         <input type="text" class="modal-input" id="new-book-name" placeholder="例如：TOEFL 核心詞彙" maxlength="20">
         <label class="modal-label">選擇圖示</label>
         <div class="icon-picker" id="icon-picker">
-          <button class="icon-option active" data-icon="📗">📗</button>
-          <button class="icon-option" data-icon="📕">📕</button>
-          <button class="icon-option" data-icon="📙">📙</button>
-          <button class="icon-option" data-icon="📓">📓</button>
-          <button class="icon-option" data-icon="📒">📒</button>
-          <button class="icon-option" data-icon="🎯">🎯</button>
-          <button class="icon-option" data-icon="🏆">🏆</button>
-          <button class="icon-option" data-icon="💼">💼</button>
-          <button class="icon-option" data-icon="🎓">🎓</button>
-          <button class="icon-option" data-icon="🌍">🌍</button>
-          <button class="icon-option" data-icon="✈️">✈️</button>
-          <button class="icon-option" data-icon="💡">💡</button>
+          <button class="icon-option active" data-icon="✦">✦</button>
+          <button class="icon-option" data-icon="✧">✧</button>
+          <button class="icon-option" data-icon="✢">✢</button>
+          <button class="icon-option" data-icon="✤">✤</button>
+          <button class="icon-option" data-icon="✥">✥</button>
+          <button class="icon-option" data-icon="❂">❂</button>
+          <button class="icon-option" data-icon="❉">❉</button>
+          <button class="icon-option" data-icon="✱">✱</button>
+          <button class="icon-option" data-icon="✲">✲</button>
+          <button class="icon-option" data-icon="✶">✶</button>
+          <button class="icon-option" data-icon="✷">✷</button>
+          <button class="icon-option" data-icon="✸">✸</button>
         </div>
       </div>
       <button class="import-btn" id="confirm-create-book" style="width:100%;">建立詞書</button>
@@ -308,6 +369,6 @@ JSON: [{"word":"hello","meanings":["你好"]}]</code>
   <div class="toast" id="toast"></div>
 
   <!-- ========== SCRIPTS ========== -->
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=4"></script>
 </body>
 </html>

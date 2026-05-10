@@ -34,7 +34,7 @@
 
 ### 線上使用
 
-直接造訪 → **[VocabMaster](https://persea0417.github.io/vocab-app/)**
+直接造訪 → **[VocabMaster](https://persea0417.github.io/WULING_VOCAB/)**
 
 > 💡 在手機瀏覽器中打開後，點選「加入主畫面」即可像原生 App 一樣使用。
 
